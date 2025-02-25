@@ -18,7 +18,6 @@ export const main: Entrypoint = async (denops) => {
    * IME 有効設定。
    */
   const set = async (active: unknown) => {
-    console.log("valid", await valid());
     if (!(await valid())) {
       return;
     }
