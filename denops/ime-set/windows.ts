@@ -1,8 +1,17 @@
 const user32 = Deno.dlopen("user32.dll", {
+  /**
+   * アクティブウィンドウを取得する。
+   * @see https://learn.microsoft.com/ja-jp/windows/win32/api/winuser/nf-winuser-getforegroundwindow
+   */
   GetForegroundWindow: {
     parameters: [],
     result: "pointer",
   },
+
+  /**
+   * メッセージを送信する。
+   * @see https://learn.microsoft.com/ja-jp/windows/win32/api/winuser/nf-winuser-sendmessagew
+   */
   SendMessageW: {
     parameters: ["pointer", "u32", "usize", "usize"],
     result: "pointer",
@@ -10,6 +19,10 @@ const user32 = Deno.dlopen("user32.dll", {
 });
 
 const imm32 = Deno.dlopen("imm32.dll", {
+  /**
+   * 指定ウィンドウに関連する IME ウィンドウを取得する。
+   * @see https://learn.microsoft.com/ja-jp/windows/win32/api/imm/nf-imm-immgetdefaultimewnd
+   */
   ImmGetDefaultIMEWnd: {
     parameters: ["pointer"],
     result: "pointer",
@@ -29,14 +42,14 @@ const IMC_SETOPENSTATUS = 0x0006;
 /**
  * IME の状態を設定する。
  */
-export const setIme = (active: boolean): void => {
+export const setImeStatus = (active: boolean): void => {
   // アクティブウィンドウの取得。
   const hwnd = user32.symbols.GetForegroundWindow();
 
   // IME ウィンドウの取得。
   const imeWnd = imm32.symbols.ImmGetDefaultIMEWnd(hwnd);
 
-  // IME状態の設定
+  // IME 状態の設定。
   user32.symbols.SendMessageW(
     imeWnd,
     WM_IME_CONTROL,

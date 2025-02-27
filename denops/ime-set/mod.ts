@@ -1,8 +1,8 @@
 import * as windows from "./windows.ts";
 
-export const setIme = (active: boolean): void | Promise<void> => {
+export const setImeStatus = (active: boolean): void | Promise<void> => {
   if (Deno.build.os === "windows") {
-    return windows.setIme(active);
+    return windows.setImeStatus(active);
   }
 
   throw new Error(`unsupported operation: ${Deno.build.os}`);
