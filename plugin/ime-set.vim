@@ -13,7 +13,7 @@ function s:SetImActivateFunc()
   endif
 endfunction
 
-augroup denops_helloworld
+augroup denops-ime-set
   autocmd!
 
   autocmd User DenopsPluginPost:ime-set call <SID>SetImActivateFunc()

@@ -1,34 +1,3 @@
-const user32 = Deno.dlopen("user32.dll", {
-  /**
-   * アクティブウィンドウを取得する。
-   * @see https://learn.microsoft.com/ja-jp/windows/win32/api/winuser/nf-winuser-getforegroundwindow
-   */
-  GetForegroundWindow: {
-    parameters: [],
-    result: "pointer",
-  },
-
-  /**
-   * メッセージを送信する。
-   * @see https://learn.microsoft.com/ja-jp/windows/win32/api/winuser/nf-winuser-sendmessagew
-   */
-  SendMessageW: {
-    parameters: ["pointer", "u32", "usize", "usize"],
-    result: "pointer",
-  },
-});
-
-const imm32 = Deno.dlopen("imm32.dll", {
-  /**
-   * 指定ウィンドウに関連する IME ウィンドウを取得する。
-   * @see https://learn.microsoft.com/ja-jp/windows/win32/api/imm/nf-imm-immgetdefaultimewnd
-   */
-  ImmGetDefaultIMEWnd: {
-    parameters: ["pointer"],
-    result: "pointer",
-  },
-});
-
 /**
  * IME に関連する操作を行うためのメッセージコード。
  */
@@ -43,6 +12,41 @@ const IMC_SETOPENSTATUS = 0x0006;
  * IME の状態を設定する。
  */
 export const setImeStatus = (active: boolean): void => {
+  if (!isRunningOnWindows()) {
+    throw new Error("Not running on windows.");
+  }
+
+  const user32 = Deno.dlopen("user32.dll", {
+    /**
+     * アクティブウィンドウを取得する。
+     * @see https://learn.microsoft.com/ja-jp/windows/win32/api/winuser/nf-winuser-getforegroundwindow
+     */
+    GetForegroundWindow: {
+      parameters: [],
+      result: "pointer",
+    },
+
+    /**
+     * メッセージを送信する。
+     * @see https://learn.microsoft.com/ja-jp/windows/win32/api/winuser/nf-winuser-sendmessagew
+     */
+    SendMessageW: {
+      parameters: ["pointer", "u32", "usize", "usize"],
+      result: "pointer",
+    },
+  });
+
+  const imm32 = Deno.dlopen("imm32.dll", {
+    /**
+     * 指定ウィンドウに関連する IME ウィンドウを取得する。
+     * @see https://learn.microsoft.com/ja-jp/windows/win32/api/imm/nf-imm-immgetdefaultimewnd
+     */
+    ImmGetDefaultIMEWnd: {
+      parameters: ["pointer"],
+      result: "pointer",
+    },
+  });
+
   // アクティブウィンドウの取得。
   const hwnd = user32.symbols.GetForegroundWindow();
 
@@ -56,4 +60,14 @@ export const setImeStatus = (active: boolean): void => {
     BigInt(IMC_SETOPENSTATUS),
     BigInt(active ? 1 : 0),
   );
+
+  user32.close();
+  imm32.close();
+};
+
+/**
+ * windows 上で動作しているかどうか。
+ */
+export const isRunningOnWindows = (): boolean => {
+  return Deno.build.os === "windows";
 };
