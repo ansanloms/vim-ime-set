@@ -19,9 +19,4 @@ export const main: Entrypoint = async (denops) => {
       await setImeStatus(active === 1);
     },
   };
-
-  // 起動時に IME を off にする。
-  if (await denops.dispatcher.valid()) {
-    await denops.dispatcher.set(0);
-  }
 };
